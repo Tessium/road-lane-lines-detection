@@ -1,0 +1,6 @@
+videos/
+videos1
+*.pptx
+*.mp4
+.idea
+__pycache__

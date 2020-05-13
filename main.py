@@ -26,7 +26,7 @@ def main(video, stream=True, frame_size=(1024, 768)):
     # if stream = False
     # create video writer object with same fps and dimensions
     if not stream:
-        out = cv2.VideoWriter('lines.mp4',
+        out = cv2.VideoWriter('processed_{}x{}.mp4'.format(frame_size[0], frame_size[1]),
                               cv2.VideoWriter_fourcc(*'DIVX'),
                               int(round(video.get_fps())),
                               frame_size)
@@ -45,16 +45,19 @@ def main(video, stream=True, frame_size=(1024, 768)):
             frame = cv2.resize(frame, frame_size, cv2.INTER_AREA)
 
             # process the frame
-            frame, slope_sum = process(frame)
+            frame, left_slope, right_slope = process(frame)
 
-            print(round(slope_sum, 2))
+            slope_sum = left_slope + right_slope
+
+            # print(round(slope_sum, 2))
+            # print(round(left_slope, 2), round(right_slope, 2))
 
             if slope_sum > .1:
                 cv2.putText(frame, "Direction: Smooth Right", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255, 255), 3)
-                print('right')
-            elif slope_sum < -.9:
+                # print('right')
+            elif slope_sum < -0.9:
                 cv2.putText(frame, "Direction: Smooth Left", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255, 255), 3)
-                print('left')
+                # print('left')
             else:
                 cv2.putText(frame, "Direction: Forward", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255, 255), 3)
 
@@ -99,10 +102,12 @@ if __name__ == '__main__':
     # get_chunks('video.mp4', 20, video.len)
 
     # create Video object
-    video = Video('videos1/vid_29.mp4')
+    video = Video('video.mp4')
 
     # call main method with desired arguments
-    main(video, stream=True, frame_size=(800, 600))
+    # possible dimensions:
+    # 1024x768 | 800x600 | 640x480 | 400x300
+    main(video, stream=False, frame_size=(1024, 768))
 
     # release video VideoCapture object
     video.release()

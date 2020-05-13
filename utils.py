@@ -139,13 +139,13 @@ def fix_lines(lines):
 def get_vertices(w, h, cut=True):
     if cut:
         if w == 1024:
-            vertices = np.array([[[450, 165], [600, 165], [w, h], [0, h]]])
+            vertices = np.array([[[450, 165], [600, 165], [w, h], [300, h]]])
         elif w == 800:
-            vertices = np.array([[[350, 130], [450, 130], [w, h], [0, h]]])
+            vertices = np.array([[[350, 130], [450, 130], [w, h], [250, h]]])
         elif w == 640:
-            vertices = np.array([[[270, 105], [370, 105], [w, h], [0, h]]])
+            vertices = np.array([[[300, 105], [370, 105], [w, h], [150, h]]])
         elif w == 400:
-            vertices = np.array([[[180, 70], [250, 75], [w, h], [0, h]]])
+            vertices = np.array([[[180, 70], [250, 75], [w, h], [100, h]]])
         else:
             vertices = np.array([[[0, 0], [1280, 0], [1280, 720], [0, 720]]])
     else:
@@ -187,6 +187,7 @@ def get_lines(frame):
     # create vertices depending on image dimensions
     h, w = edges.shape
 
+    # get vertices for current frame dimension
     vertices = get_vertices(w, h)
 
     # mask detected edges, to remove redundant ones and leave only lane lines edges
@@ -202,6 +203,9 @@ def get_lines(frame):
     else:
         detected = [Line(i[0][0], i[0][1], i[0][2], i[0][3]) for i in detected]
         OLD_LINES = detected
+
+    if detected is None:
+        return None
 
     # filter lines based on absolute value of their slopes
     # removes redundant lines, such as, vertical or horizontal lines
@@ -287,6 +291,9 @@ def process(frame):
     # get hough lines from frame
     lines = get_lines(cut)
 
+    if not lines:
+        return frame, 0
+
     # smooth and fix absent lines
     lines = fix_lines(lines)
 
@@ -304,4 +311,4 @@ def process(frame):
     blended = blend(masked, frame)
 
     # return ready frame
-    return blended, lines[0].slope + lines[1].slope
+    return blended, lines[0].slope, lines[1].slope
